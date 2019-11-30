@@ -1,0 +1,10 @@
+{
+  "require": {
+    "catfan/medoo": "^1.6"
+  },
+  "autoload": {
+    "psr-0": {
+      "": "Core/Classes"
+    }
+  }
+}
