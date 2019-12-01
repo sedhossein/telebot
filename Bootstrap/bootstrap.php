@@ -9,8 +9,8 @@ foreach ($main_classes as $class){
 	require_once __DIR__.'/../Core/Classes/' . $class . '.php';
 }
 
-global $database;
 global $database_config;
+global $database;
 $database = new Medoo($database_config);// make db instance
 
 global $request;

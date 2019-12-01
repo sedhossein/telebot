@@ -1,6 +1,9 @@
 <?php
 
 
+/**
+ * Class User
+ */
 class User
 {
     /**
@@ -23,12 +26,13 @@ class User
     /**
      * Konstruktor => Setzt Bot ID
      *
-     * @param string $bkey Bot ID
+     * @param string $chat_id chat id
      * @access public
      */
-    public function __construct($chat_id = 121329029)//admin id for trace
+    public function __construct($chat_id)
     {
         global $config;
+
         $this->bot_key = $config['bot_token'];
         $this->chat_id = $chat_id;
     }
@@ -57,7 +61,7 @@ class User
      */
     public function send_message($text, $reply_to_message_id = NULL, $parse_mode = 'HTML', $disable_web_page_preview = false, $disable_notification = false)
     {
-        global $request;
+        global $request, $logger;
 
         $action = 'sendMessage';
         $param = array(
@@ -71,30 +75,27 @@ class User
 
         $res = $this->connect($action, $param)->result;
 
-
-        $data = [
+        $logger->info([
             'success' => 1,
             'user_id' => $this->chat_id,
             'type' => 'send_message',
             'title' => 'Send Message Action',
             'more_info' => 'more info : ' . $text . ' for this request : ' . $request->text,
-        ];
-        $res = Log::insert($data);
+        ]);
 
-
-        if (!$res['ok'])
-            $result = Array("success" => 0, "info" => "Error: " . $res['description']);
-        else
-            $result = Array("success" => 1, "info" => "Message send");
-
-        return $result;
+        return !$res['ok'] ?
+            ["success" => 0, "info" => "Error: " . $res['description']] :
+            ["success" => 1, "info" => "Message send"];
     }
 
+    /**
+     *
+     */
     public function update_last_action()
     {
         global $database;
 
-        $res = $database->update('users', [
+        $database->update('users', [
             'last_action' => date('Y-m-d H:i:s', time()),
         ], [
             'user_id' => $this->chat_id
@@ -102,6 +103,11 @@ class User
     }
 
 
+    /**
+     * @param $method
+     * @param array $dates
+     * @return mixed
+     */
     function connect($method, $dates = [])
     {
         global $config;
@@ -121,9 +127,15 @@ class User
     }
 
 
+    /**
+     * @param $to
+     * @param $from
+     * @param $message_id
+     * @return bool|string
+     */
     function forward_message($to, $from, $message_id)
     {
-        global $request;
+        global $request, $logger;
 
         $res = $this->connect('ForwardMessage', [
             'chat_id' => $to,
@@ -133,26 +145,22 @@ class User
 
 
         if (!$res['ok']) {
-            $data = [
+            $logger->info([
                 'success' => 0,
                 'user_id' => $this->chat_id,
                 'type' => 'forward_message',
                 'title' => 'Forward Message Action',
                 'more_info' => 'description : ' . $res['description'] . ' for this request : ' . $request->text,
-            ];
+            ]);
         } else {
-            $data = [
+            $logger->warning([
                 'success' => 1,
                 'user_id' => $this->chat_id,
                 'type' => 'forward_message',
                 'title' => 'Forward Message Action',
                 'more_info' => 'description : ' . $res['description'] . ' for this request : ' . $request->text,
-            ];
+            ]);
         }
-
-        $res = Log::insert($data);
-
-        return $res;
     }
 
 

@@ -18,6 +18,10 @@ $config = [
         // '11111','22222',
     ],
 
+    'super_admin' => [
+        ''
+    ],
+
     'services' => [
         'sms' => [
             'url' => "https://XXX.com",

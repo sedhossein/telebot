@@ -66,7 +66,6 @@ class Request
 
         $res = $this->connect($action, $param)->result;
 
-
         $data = [
             'success' => 1,
             'user_id' => $this->chat_id,
