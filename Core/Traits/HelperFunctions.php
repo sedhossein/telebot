@@ -1,5 +1,6 @@
 <?php
 
+// REST
 function sms_to($numbers = "", $message = "")
 {
     global $config;
@@ -24,7 +25,6 @@ function sms_to($numbers = "", $message = "")
     return json_encode($res);
 }
 
-
 //from database, admin was off the bot
 function is_bot_off()
 {
@@ -38,7 +38,6 @@ function is_bot_off()
 
     return $bot_status['is_off'];
 }
-
 
 function is_block_user($user_id)
 {

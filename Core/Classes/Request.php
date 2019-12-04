@@ -3,7 +3,7 @@
 /**
  * Class Request
  */
-class Request
+final class Request
 {
     public $_request;
     public $_parsed_request;
@@ -35,7 +35,7 @@ class Request
      */
     public function parse_request()
     {
-        $rawData = file_get_contents('php://input');
+        $rawData = file_get_contents('php://input'); # Get JSON as a string
         $this->_parsed_request = json_decode($rawData, true);
         return $this->_parsed_request;
     }
@@ -49,39 +49,39 @@ class Request
      * @param bool $disable_notification
      * @return array
      */
-    public function send_message($chat_id, $text, $reply_to_message_id = NULL, $parse_mode = 'HTML',
-                                 $disable_web_page_preview = false, $disable_notification = false)
+    public function send_message($chat_id,
+                                 $text,
+                                 $reply_to_message_id = null,
+                                 $parse_mode = 'HTML',
+                                 $disable_web_page_preview = false,
+                                 $disable_notification = false)
     {
-        global $request;
+        global $request, $logger;
 
         $action = 'sendMessage';
-        $param = array(
+        $param = [
             'chat_id' => $chat_id,
             'text' => $text,
             'parse_mode' => $parse_mode,
             'disable_web_page_preview' => $disable_web_page_preview,
             'disable_notification' => $disable_notification,
             'reply_to_message_id' => $reply_to_message_id
-        );
+        ];
 
         $res = $this->connect($action, $param)->result;
 
-        $data = [
-            'success' => 1,
-            'user_id' => $this->chat_id,
-            'type' => 'send_message',
-            'title' => 'Send Message Action',
-            'more_info' => 'more info : ' . $text . ' for this request : ' . $request->text,
-        ];
-        $res = Log::insert($data);
+        $logger->info([
+                'success' => 1,
+                'user_id' => $this->chat_id,
+                'type' => 'send_message',
+                'title' => 'Send Message Action',
+                'more_info' => 'more info : ' . $text . ' for this request : ' . $request->text,
+            ]
+        );
 
-
-        if (!$res['ok'])
-            $result = Array("success" => 0, "info" => "Error: " . $res['description']);
-        else
+        return !$res['ok'] ?
+            $result = Array("success" => 0, "info" => "Error: " . $res['description']) :
             $result = Array("success" => 1, "info" => "Message send");
-
-        return $result;
     }
 
 
@@ -92,18 +92,33 @@ class Request
      */
     function connect($method, $dates = [])
     {
-        global $config;
+        global $config, $logger;
 
-        $method = ucfirst($method);
-        $url = "https://api.telegram.org/bot" . $config['bot_token'] . "/" . $method;
+        $url = "https://api.telegram.org/bot" . $config['bot_token'] . "/" . ucfirst($method);
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($dates));
         $res = curl_exec($ch);
+
         if (curl_error($ch)) {
             var_dump(curl_error($ch));
+            $logger->error([
+                'success' => 0,
+                'user_id' => $this->chat_id,
+                'type' => 'connect',
+                'title' => 'connect Action',
+                'more_info' => 'request to telegram api',
+            ]);
         } else {
+            $logger->debug([
+                'success' => 1,
+                'user_id' => $this->chat_id,
+                'type' => 'connect',
+                'title' => 'connect Action',
+                'more_info' => 'request to telegram api',
+            ]);
+
             return json_decode($res);
         }
     }
@@ -117,7 +132,7 @@ class Request
      */
     function forward_message($to, $from, $message_id)
     {
-        global $request;
+        global $request, $logger;
 
         $res = $this->connect('ForwardMessage', [
             'chat_id' => $to,
@@ -126,26 +141,20 @@ class Request
         ])->result;
 
 
-        if (!$res['ok']) {
-            $data = [
+        !$res['ok'] ?
+            $logger->debug([
                 'success' => 0,
                 'user_id' => $this->chat_id,
                 'type' => 'forward_message',
                 'title' => 'Forward Message Action',
                 'more_info' => 'description : ' . $res['description'] . ' for this request : ' . $request->text,
-            ];
-        } else {
-            $data = [
+            ]) :
+            $logger->debug([
                 'success' => 1,
                 'user_id' => $this->chat_id,
                 'type' => 'forward_message',
                 'title' => 'Forward Message Action',
                 'more_info' => 'description : ' . $res['description'] . ' for this request : ' . $request->text,
-            ];
-        }
-
-        $res = Log::insert($data);
-
-        return $res;
+            ]);
     }
 }

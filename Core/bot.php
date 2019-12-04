@@ -4,6 +4,7 @@ global $config;
 global $database;
 global $request;
 global $user;
+global $logger;
 
 // Routing
 if (is_admin_user($user->chat_id)) {
@@ -19,7 +20,7 @@ if (is_admin_user($user->chat_id)) {
     // foreign user comes here
     // send to monitoring gp
 
-    Log::insert([
+    $logger->info([
         'success' => 1,
         'user_id' => $user->chat_id,
         'type' => 'forbidden_user',
