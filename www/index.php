@@ -1,5 +1,7 @@
 <?php
 
+echo "running ...";
+
 define('BOT_START', microtime(true));
 
 // autoload + booting

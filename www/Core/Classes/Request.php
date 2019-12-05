@@ -9,8 +9,8 @@ final class Request
     public $_parsed_request;
     public $chat_id;
     public $text;
-    public $first_name;
-    public $last_name;
+    public $user_first_name;
+    public $user_last_name;
     public $from;
     public $username;
 
@@ -23,8 +23,8 @@ final class Request
         $this->_request = $parsed_request;
         $this->chat_id = $parsed_request["message"]["chat"]["id"];
         $this->text = $parsed_request["message"]["text"];
-        $this->first_name = $parsed_request['message']['from']['first_name'];
-        $this->last_name = $parsed_request['message']['from']['last_name'];//message->from->id;
+        $this->user_first_name = $parsed_request['message']['from']['first_name'];
+        $this->user_last_name = $parsed_request['message']['from']['last_name'];//message->from->id;
         $this->from = $parsed_request['message']['from']['id'];//message->from->id;
         $this->username = $parsed_request['message']['from']['username'];//message->from->id;
     }

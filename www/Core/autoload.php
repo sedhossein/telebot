@@ -3,7 +3,7 @@
 date_default_timezone_set('Asia/Tehran');
 
 // composer autoload
-//require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
 // load helpers
 require_once __DIR__ . '/../Core/Traits/HelperFunctions.php';
