@@ -1,9 +1,9 @@
-<?php
+FROM php:7.4-apache
 
-define('BOT_START', microtime(true));
+RUN docker-php-ext-install mysqli
 
-// autoload + booting
-require_once __DIR__.'/Core/autoload.php';
+COPY . /var/www/html/
 
-// run project
-require_once __DIR__.'/Core/bot.php';
+WORKDIR /var/www/html/
+
+#CMD [ "php", "./index.php" ]
